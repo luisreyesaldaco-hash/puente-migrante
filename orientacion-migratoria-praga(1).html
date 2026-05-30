@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orientación Migratoria para Latinos en Chequia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2238;
+    --ink-soft: #44506b;
+    --paper: #f6f1e7;
+    --paper-warm: #efe6d4;
+    --terra: #c2410c;
+    --terra-deep: #9a3412;
+    --gold: #b8893f;
+    --line: #d9cdb6;
+    --white: #fffdf8;
+    --shadow: 26, 34, 56;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Mulish', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(184,137,63,0.10), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(194,65,12,0.07), transparent 45%);
+  }
+
+  /* grain overlay */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(246,241,231,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1080px; margin: 0 auto; padding: 16px 28px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.25rem;
+    letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px;
+  }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--terra), var(--gold));
+    display: grid; place-items: center; color: var(--white);
+    font-size: 0.85rem; font-weight: 700; font-family: 'Mulish';
+  }
+  .nav-cta {
+    font-size: 0.9rem; font-weight: 600; text-decoration: none;
+    color: var(--white); background: var(--ink);
+    padding: 9px 18px; border-radius: 100px; transition: transform .2s, background .2s;
+  }
+  .nav-cta:hover { background: var(--terra); transform: translateY(-1px); }
+
+  /* ---------- HERO ---------- */
+  header { padding: 88px 0 72px; position: relative; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--terra-deep);
+    background: var(--paper-warm); border: 1px solid var(--line);
+    padding: 7px 15px; border-radius: 100px; margin-bottom: 28px;
+    opacity: 0; animation: rise .7s .1s forwards;
+  }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terra); }
+
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 4.3rem); line-height: 1.04;
+    letter-spacing: -0.025em; max-width: 14ch;
+    opacity: 0; animation: rise .8s .2s forwards;
+  }
+  h1 em { font-style: italic; color: var(--terra-deep); }
+
+  .lead {
+    font-size: clamp(1.05rem, 2vw, 1.28rem); color: var(--ink-soft);
+    max-width: 52ch; margin-top: 26px;
+    opacity: 0; animation: rise .8s .35s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 38px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+    opacity: 0; animation: rise .8s .5s forwards;
+  }
+  .btn-primary {
+    background: var(--terra); color: var(--white); text-decoration: none;
+    font-weight: 700; font-size: 1rem; padding: 15px 30px; border-radius: 100px;
+    box-shadow: 0 8px 24px rgba(194,65,12,0.28); transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(194,65,12,0.4); }
+  .btn-ghost {
+    color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.98rem;
+    display: inline-flex; align-items: center; gap: 8px; transition: gap .2s;
+  }
+  .btn-ghost:hover { gap: 12px; }
+
+  .hero-trust {
+    margin-top: 46px; display: flex; gap: 30px; flex-wrap: wrap;
+    opacity: 0; animation: rise .8s .65s forwards;
+  }
+  .trust-item { display: flex; align-items: center; gap: 10px; font-size: 0.92rem; color: var(--ink-soft); }
+  .trust-item svg { color: var(--gold); flex-shrink: 0; }
+
+  /* ---------- SECTION GENERIC ---------- */
+  section { padding: 78px 0; }
+  .sec-label {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
+  }
+  .sec-title {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: clamp(1.8rem, 4vw, 2.7rem); line-height: 1.12;
+    letter-spacing: -0.02em; max-width: 20ch;
+  }
+  .sec-intro { color: var(--ink-soft); max-width: 56ch; margin-top: 18px; font-size: 1.05rem; }
+
+  /* ---------- PAIN / EMPATHY ---------- */
+  .empathy { background: var(--ink); color: var(--paper); border-radius: 28px; padding: 60px 48px; position: relative; overflow: hidden; }
+  .empathy::before {
+    content: ""; position: absolute; top: -60px; right: -60px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(194,65,12,0.35), transparent 70%);
+  }
+  .empathy .sec-label { color: var(--gold); }
+  .empathy .sec-title { color: var(--white); position: relative; }
+  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 22px; margin-top: 44px; position: relative; }
+  .pain {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 24px;
+  }
+  .pain h4 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.15rem; margin-bottom: 8px; color: var(--white); }
+  .pain p { font-size: 0.94rem; color: rgba(246,241,231,0.7); }
+
+  /* ---------- STEPS ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 28px; margin-top: 50px; }
+  .step { position: relative; padding-top: 18px; }
+  .step-num {
+    font-family: 'Fraunces', serif; font-size: 3.2rem; font-weight: 400;
+    color: var(--terra); opacity: 0.25; line-height: 1; font-style: italic;
+  }
+  .step h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.35rem; margin: 8px 0 10px; }
+  .step p { color: var(--ink-soft); font-size: 0.98rem; }
+  .step::after {
+    content: ""; position: absolute; left: 0; bottom: -14px;
+    width: 38px; height: 3px; background: var(--gold); border-radius: 2px;
+  }
+
+  /* ---------- ASSETS / WHY ME ---------- */
+  .why { background: var(--white); border: 1px solid var(--line); border-radius: 28px; padding: 56px 48px; }
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 30px; margin-top: 40px; }
+  .why-item { display: flex; gap: 16px; align-items: flex-start; }
+  .why-icon {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
+    background: var(--paper-warm); display: grid; place-items: center; color: var(--terra-deep);
+  }
+  .why-item h4 { font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+  .why-item p { font-size: 0.94rem; color: var(--ink-soft); }
+
+  /* ---------- FORM ---------- */
+  .cta-band { background: linear-gradient(140deg, var(--terra-deep), var(--terra)); border-radius: 28px; padding: 60px 48px; color: var(--white); }
+  .cta-band .sec-title { color: var(--white); }
+  .cta-band .sec-label { color: rgba(255,255,255,0.7); }
+  .cta-band .sec-intro { color: rgba(255,255,255,0.85); }
+  form { margin-top: 36px; display: grid; gap: 18px; max-width: 560px; }
+  .field { display: grid; gap: 7px; }
+  .field label { font-size: 0.88rem; font-weight: 600; letter-spacing: 0.01em; }
+  .field input, .field select, .field textarea {
+    font-family: 'Mulish', sans-serif; font-size: 1rem;
+    padding: 13px 16px; border-radius: 12px; border: none;
+    background: rgba(255,255,255,0.95); color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 96px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--gold); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .submit-btn {
+    background: var(--ink); color: var(--white); border: none; cursor: pointer;
+    font-family: 'Mulish'; font-weight: 700; font-size: 1.02rem;
+    padding: 16px; border-radius: 100px; margin-top: 6px; transition: transform .2s, background .2s;
+  }
+  .submit-btn:hover { background: #0d1426; transform: translateY(-2px); }
+  .form-note { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .form-success {
+    display: none; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px; padding: 22px; margin-top: 20px; font-size: 0.98rem;
+  }
+
+  /* ---------- LEGAL DISCLAIMER ---------- */
+  .disclaimer {
+    background: var(--paper-warm); border: 1px dashed var(--gold);
+    border-radius: 16px; padding: 26px 28px; margin: 60px 0;
+    font-size: 0.88rem; color: var(--ink-soft); line-height: 1.65;
+  }
+  .disclaimer strong { color: var(--ink); }
+
+  /* ---------- FOOTER ---------- */
+  footer { padding: 50px 0 60px; border-top: 1px solid var(--line); text-align: center; }
+  footer .brand { justify-content: center; margin-bottom: 16px; }
+  .social { display: flex; gap: 18px; justify-content: center; margin: 18px 0; }
+  .social a { color: var(--ink-soft); text-decoration: none; font-weight: 600; font-size: 0.92rem; transition: color .2s; }
+  .social a:hover { color: var(--terra); }
+  footer small { color: var(--ink-soft); font-size: 0.82rem; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    .empathy, .why, .cta-band { padding: 40px 26px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand"><span class="mark">PM</span> Puente Migrante</div>
+    <a href="#contacto" class="nav-cta">Cuéntame tu caso</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Para latinos en República Checa</span>
+    <h1>Tus trámites en Chequia, explicados <em>en tu idioma</em>.</h1>
+    <p class="lead">Visa, pobyt, renovaciones, documentos rechazados. Un abogado que te habla en español, entiende el sistema checo y te dice qué hacer — paso a paso, sin que te pierdas en la burocracia.</p>
+    <div class="hero-cta">
+      <a href="#contacto" class="btn-primary">Cuéntame tu caso gratis</a>
+      <a href="#como" class="btn-ghost">Cómo funciona →</a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        Abogado hispanohablante
+      </div>
+      <div class="trust-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        Traducción jurada certificada
+      </div>
+      <div class="trust-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        Red de abogados checos habilitados
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="empathy">
+      <div class="sec-label">El problema</div>
+      <h2 class="sec-title">Llegar es difícil. La burocracia checa lo hace peor.</h2>
+      <div class="pain-grid">
+        <div class="pain">
+          <h4>No entiendes el papeleo</h4>
+          <p>Formularios en checo, requisitos que cambian, sellos que faltan. Un error y te rechazan la solicitud.</p>
+        </div>
+        <div class="pain">
+          <h4>Nadie te explica claro</h4>
+          <p>Las oficinas no atienden en español y la información en línea está fragmentada o desactualizada.</p>
+        </div>
+        <div class="pain">
+          <h4>Pagas de más por miedo</h4>
+          <p>Sin saber qué es urgente y qué no, terminas contratando servicios caros que quizá ni necesitas.</p>
+        </div>
+        <div class="pain">
+          <h4>El reloj corre</h4>
+          <p>Los plazos migratorios no perdonan. Un trámite tarde puede costarte tu estancia legal.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <div class="sec-label">Cómo funciona</div>
+    <h2 class="sec-title">Un proceso claro, sin sorpresas.</h2>
+    <p class="sec-intro">Empezamos por entender tu caso. Si lo puedo resolver con orientación y gestión, lo hacemos. Si necesita un abogado checo habilitado, te conecto con el indicado — sin que pierdas tiempo ni dinero adivinando.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Me cuentas tu caso</h3>
+        <p>Por formulario o llamada. En español, sin tecnicismos. Reviso tu situación y los documentos que tengas.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Hago el triage</h3>
+        <p>Te digo con honestidad qué necesitas: si es orientación y gestión documental, o si requiere un abogado checo para litigio.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Resolvemos o derivamos</h3>
+        <p>Te acompaño en el trámite y la traducción jurada, o te conecto con el abogado habilitado correcto en Chequia.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>No te suelto</h3>
+        <p>Seguimiento hasta que tu trámite avance. Sigues hablando conmigo, en tu idioma, en cada paso.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="why">
+      <div class="sec-label">Por qué conmigo</div>
+      <h2 class="sec-title">Confianza primero. Resultados después.</h2>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L2 9l10 6 10-6-10-6zM2 9v6M22 9v6M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg>
+          </div>
+          <div>
+            <h4>Soy abogado</h4>
+            <p>Formación jurídica real. Sé leer un requisito, detectar un error y entender qué está en juego en tu caso.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+          </div>
+          <div>
+            <h4>Traducción jurada certificada</h4>
+            <p>Traductora oficial certificada en el equipo. Tus documentos quedan listos para presentarse, sin rebotes.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <h4>Hablamos el mismo idioma</h4>
+            <p>Literal y culturalmente. Entiendo de dónde vienes y te explico el sistema checo sin que te sientas tonto.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <div>
+            <h4>Red de abogados checos</h4>
+            <p>Cuando tu caso necesita un profesional habilitado en Chequia, ya sé a quién acudir. No empiezas de cero.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="wrap">
+    <div class="cta-band">
+      <div class="sec-label">Primer paso</div>
+      <h2 class="sec-title">Cuéntame tu caso. La primera revisión es gratis.</h2>
+      <p class="sec-intro">Llena el formulario y te respondo personalmente. Entre más me cuentes, mejor puedo orientarte desde el primer mensaje.</p>
+      <form id="caseForm">
+        <div class="form-row">
+          <div class="field">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre">
+          </div>
+          <div class="field">
+            <label for="pais">País de origen</label>
+            <input type="text" id="pais" name="pais" placeholder="México, Colombia, Venezuela...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="contacto">WhatsApp o email</label>
+            <input type="text" id="contacto" name="contacto" required placeholder="Para responderte">
+          </div>
+          <div class="field">
+            <label for="tipo">Tipo de trámite</label>
+            <select id="tipo" name="tipo">
+              <option value="">Selecciona...</option>
+              <option>Visa / primer permiso de estancia</option>
+              <option>Renovación de pobyt</option>
+              <option>Solicitud rechazada</option>
+              <option>Reunificación familiar</option>
+              <option>Traducción de documentos</option>
+              <option>Otro / no estoy seguro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="caso">Cuéntame tu situación</label>
+          <textarea id="caso" name="caso" placeholder="¿Qué necesitas? ¿Hay alguna fecha límite? Mientras más detalle, mejor."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Enviar mi caso</button>
+        <p class="form-note">Responder no te compromete a nada. Solo quiero entender cómo ayudarte.</p>
+      </form>
+      <div class="form-success" id="successMsg">
+        ✓ ¡Gracias! Recibí tu caso y te responderé personalmente muy pronto. Revisa tu WhatsApp o email.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="disclaimer">
+    <strong>Aviso importante.</strong> Este servicio ofrece <strong>orientación informativa, gestión de trámites y traducción de documentos</strong> para personas hispanohablantes en la República Checa. No constituye asesoría jurídica vinculante sobre derecho checo. Cuando un caso requiere representación legal o un dictamen jurídico bajo la legislación checa, se deriva a un abogado debidamente habilitado ante la Česká advokátní komora (Colegio de Abogados de la República Checa). La revisión inicial no crea una relación abogado–cliente.
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand"><span class="mark">PM</span> Puente Migrante</div>
+    <div class="social">
+      <a href="#">Instagram</a>
+      <a href="#">WhatsApp</a>
+      <a href="#">Email</a>
+    </div>
+    <small>Praga, República Checa · Orientación migratoria para la comunidad latina</small>
+  </div>
+</footer>
+
+<script>
+  const form = document.getElementById('caseForm');
+  const success = document.getElementById('successMsg');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Aquí conectas tu backend / Supabase / email. Por ahora solo confirma visualmente.
+    form.style.display = 'none';
+    success.style.display = 'block';
+    success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+
+</body>
+</html>
