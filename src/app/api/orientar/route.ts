@@ -5,7 +5,7 @@ import { PUENTE_SYSTEM_PROMPT, PUENTE_UI_DISCLAIMER } from "@/lib/system-prompt"
 export const runtime = "edge";
 
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent";
 
 function json(obj: unknown, status: number) {
   return new Response(JSON.stringify(obj), {
