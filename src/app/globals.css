@@ -285,6 +285,95 @@ footer small { color: var(--ink-soft); font-size: 0.82rem; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ADMIN */
+.admin-login {
+  min-height: 100vh; display: grid; place-items: center; background: var(--paper);
+}
+.admin-login-box {
+  background: var(--white); border: 1px solid var(--line); border-radius: 20px;
+  padding: 40px 36px; width: 100%; max-width: 380px;
+}
+.admin-shell { min-height: 100vh; background: var(--paper); }
+.admin-nav {
+  background: var(--ink); padding: 14px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.admin-nav .brand { color: var(--white); }
+.admin-nav .mark { background: linear-gradient(135deg, var(--terra), var(--gold)); }
+.admin-refresh {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--white); cursor: pointer; border-radius: 100px;
+  font-family: var(--font-mulish), sans-serif; font-size: 0.88rem;
+  padding: 7px 16px; transition: background .2s;
+}
+.admin-refresh:hover:not(:disabled) { background: rgba(255,255,255,0.18); }
+.admin-inbox { padding: 36px 28px; }
+.admin-title {
+  font-family: var(--font-fraunces), serif; font-weight: 500;
+  font-size: 1.6rem; margin-bottom: 28px; display: flex; align-items: center; gap: 12px;
+}
+.admin-count {
+  background: var(--terra); color: var(--white); border-radius: 100px;
+  font-size: 0.9rem; font-weight: 700; padding: 2px 10px;
+  font-family: var(--font-mulish), sans-serif;
+}
+.caso-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+  padding: 22px 24px; margin-bottom: 18px;
+}
+.caso-header { margin-bottom: 10px; }
+.caso-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.caso-meta strong { font-size: 1rem; }
+.caso-pais {
+  font-size: 0.78rem; background: var(--paper-warm); border: 1px solid var(--line);
+  border-radius: 100px; padding: 2px 10px; color: var(--ink-soft);
+}
+.caso-fecha { font-size: 0.78rem; color: var(--ink-soft); }
+.caso-contacto { font-size: 0.88rem; color: var(--terra-deep); font-weight: 600; margin-bottom: 3px; }
+.caso-tipo { font-size: 0.82rem; color: var(--ink-soft); }
+.caso-texto {
+  font-size: 0.97rem; color: var(--ink); background: var(--paper);
+  border-radius: 10px; padding: 12px 14px; margin: 12px 0; line-height: 1.6;
+  border-left: 3px solid var(--line);
+}
+.caso-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.caso-btn {
+  border: none; cursor: pointer; border-radius: 100px;
+  font-family: var(--font-mulish), sans-serif; font-weight: 700;
+  font-size: 0.88rem; padding: 9px 18px; transition: transform .15s, opacity .15s;
+}
+.caso-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.caso-btn:not(:disabled):hover { transform: translateY(-1px); }
+.caso-btn-resumir { background: var(--ink); color: var(--white); }
+.caso-btn-ley { background: var(--terra); color: var(--white); }
+.caso-analisis {
+  margin-top: 14px; padding: 14px 16px; background: var(--paper-warm);
+  border-radius: 10px; display: grid; gap: 6px;
+}
+.caso-badge {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em;
+  border-radius: 100px; padding: 3px 12px; display: inline-block; width: fit-content;
+}
+.badge-legal { background: #dcfce7; color: #15803d; }
+.badge-no-legal { background: var(--paper); color: var(--ink-soft); }
+.caso-resumen { font-size: 0.95rem; color: var(--ink); }
+.caso-concepto { font-size: 0.85rem; color: var(--ink-soft); }
+.caso-ley {
+  margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.caso-ley-label {
+  background: var(--ink); color: var(--gold); font-size: 0.78rem;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 8px 14px;
+}
+.caso-ley-loading { padding: 16px; color: var(--ink-soft); font-size: 0.9rem; }
+.caso-ley-texto {
+  font-family: var(--font-mulish), sans-serif; font-size: 0.85rem;
+  line-height: 1.65; color: var(--ink); padding: 16px 14px;
+  white-space: pre-wrap; word-break: break-word; margin: 0;
+  max-height: 420px; overflow-y: auto; background: var(--white);
+}
+
 @media (max-width: 640px) {
   .form-row { grid-template-columns: 1fr; }
   .empathy, .why, .cta-band { padding: 40px 26px; }
