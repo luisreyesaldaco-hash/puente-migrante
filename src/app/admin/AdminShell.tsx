@@ -10,44 +10,58 @@ type Caso = {
   tipo: string | null;
   caso: string | null;
   created_at: string;
-};
-
-type Analisis = {
-  resumen: string;
-  es_legal: boolean;
+  // cached fields
+  resumen: string | null;
+  es_legal: boolean | null;
   concepto_legal: string | null;
+  articulos: string | null;
+  brief: string | null;
 };
 
 type CasoState = {
-  analisis?: Analisis;
+  open: boolean;
+  analisis?: { resumen: string; es_legal: boolean; concepto_legal: string | null };
   articulos?: string;
   brief?: string;
   loadingResumen?: boolean;
   loadingLey?: boolean;
   loadingBrief?: boolean;
+  expandLey?: boolean;
+  expandBrief?: boolean;
   errorResumen?: string;
   errorLey?: string;
   errorBrief?: string;
-  expandLey?: boolean;
-  expandBrief?: boolean;
 };
 
-function renderBrief(text: string): React.ReactNode {
-  return text.split("\n").map((line, i) => {
-    if (line.startsWith("**") && line.endsWith("**")) {
-      return <p key={i} className="brief-heading">{line.slice(2, -2)}</p>;
-    }
-    if (line.startsWith("- ")) {
-      return <p key={i} className="brief-item">• {line.slice(2)}</p>;
-    }
-    if (line.trim() === "") return <br key={i} />;
-    return <p key={i} className="brief-line">{line}</p>;
-  });
+function estadoDesdeCache(c: Caso): CasoState {
+  const hasAnalisis = c.resumen != null || c.es_legal != null;
+  return {
+    open: false,
+    analisis: hasAnalisis
+      ? { resumen: c.resumen!, es_legal: c.es_legal!, concepto_legal: c.concepto_legal ?? null }
+      : undefined,
+    articulos: c.articulos ?? undefined,
+    brief: c.brief ?? undefined,
+    expandLey: !!c.articulos,
+    expandBrief: !!c.brief,
+  };
 }
 
 function formatFecha(iso: string) {
   return new Date(iso).toLocaleString("es-MX", {
     day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function renderBrief(text: string): React.ReactNode {
+  return text.split("\n").map((line, i) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("**") && trimmed.endsWith("**"))
+      return <p key={i} className="brief-heading">{trimmed.slice(2, -2)}</p>;
+    if (trimmed.startsWith("- "))
+      return <p key={i} className="brief-item">• {trimmed.slice(2)}</p>;
+    if (trimmed === "") return <br key={i} />;
+    return <p key={i} className="brief-line">{line}</p>;
   });
 }
 
@@ -62,15 +76,14 @@ export default function AdminShell() {
   const fetchCasos = useCallback(async () => {
     setLoading(true);
     const res = await fetch("/api/admin/casos");
-    if (res.status === 401) { setAuthed(false); return; }
-    const data = await res.json();
+    if (res.status === 401) { setAuthed(false); setLoading(false); return; }
+    const data: Caso[] = await res.json();
     setCasos(data);
+    setEstados(Object.fromEntries(data.map((c) => [c.id, estadoDesdeCache(c)])));
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (authed) fetchCasos();
-  }, [authed, fetchCasos]);
+  useEffect(() => { if (authed) fetchCasos(); }, [authed, fetchCasos]);
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -81,52 +94,56 @@ export default function AdminShell() {
     });
   }
 
-  async function handleResumit(caso: Caso) {
-    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: true, errorResumen: undefined } }));
+  function toggleOpen(id: number) {
+    setEstados((s) => ({ ...s, [id]: { ...s[id], open: !s[id]?.open } }));
+  }
+
+  async function handleResumit(c: Caso) {
+    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: true, errorResumen: undefined } }));
     const res = await fetch("/api/admin/resumir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ caso: caso.caso }),
+      body: JSON.stringify({ id: c.id, caso: c.caso }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: false, errorResumen: data.error } }));
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: false, errorResumen: data.error } }));
     } else {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: false, analisis: data } }));
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: false, analisis: data } }));
     }
   }
 
-  async function handleAnalizar(caso: Caso) {
-    const articulos = estados[caso.id]?.articulos;
-    if (!articulos) return;
-    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: true, errorBrief: undefined, expandBrief: true } }));
-    const res = await fetch("/api/admin/analizar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ caso: caso.caso, articulos }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, errorBrief: data.error } }));
-    } else {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, brief: data.brief } }));
-    }
-  }
-
-  async function handleInvestigar(caso: Caso) {
-    const concepto = estados[caso.id]?.analisis?.concepto_legal;
+  async function handleInvestigar(c: Caso) {
+    const concepto = estados[c.id]?.analisis?.concepto_legal;
     if (!concepto) return;
-    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: true, errorLey: undefined, expandLey: true } }));
+    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: true, errorLey: undefined, expandLey: true } }));
     const res = await fetch("/api/admin/investigar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ concepto_legal: concepto }),
+      body: JSON.stringify({ id: c.id, concepto_legal: concepto }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: false, errorLey: data.error } }));
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: false, errorLey: data.error } }));
     } else {
-      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: false, articulos: data.articulos } }));
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: false, articulos: data.articulos } }));
+    }
+  }
+
+  async function handleAnalizar(c: Caso) {
+    const articulos = estados[c.id]?.articulos;
+    if (!articulos) return;
+    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: true, errorBrief: undefined, expandBrief: true } }));
+    const res = await fetch("/api/admin/analizar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: c.id, caso: c.caso, articulos }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: false, errorBrief: data.error } }));
+    } else {
+      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: false, brief: data.brief } }));
     }
   }
 
@@ -140,13 +157,7 @@ export default function AdminShell() {
           <form onSubmit={handleLogin} style={{ display: "grid", gap: 14 }}>
             <div className="field">
               <label>Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoFocus
-              />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoFocus />
             </div>
             {loginError && <p style={{ color: "var(--terra)", fontSize: "0.88rem" }}>{loginError}</p>}
             <button type="submit" className="submit-btn">Entrar</button>
@@ -166,99 +177,96 @@ export default function AdminShell() {
       </div>
 
       <div className="admin-inbox wrap">
-        <h1 className="admin-title">Casos recibidos <span className="admin-count">{casos.length}</span></h1>
+        <h1 className="admin-title">
+          Casos recibidos <span className="admin-count">{casos.length}</span>
+        </h1>
 
         {casos.length === 0 && !loading && (
           <p style={{ color: "var(--ink-soft)", marginTop: 32 }}>No hay casos aún.</p>
         )}
 
         {casos.map((c) => {
-          const st = estados[c.id] || {};
+          const st = estados[c.id] || { open: false };
           const analisis = st.analisis;
           const esLegal = analisis?.es_legal === true;
 
           return (
             <div key={c.id} className="caso-card">
-              <div className="caso-header">
-                <div className="caso-meta">
+
+              {/* HEADER — siempre visible, click para colapsar */}
+              <button className="caso-toggle" onClick={() => toggleOpen(c.id)}>
+                <div className="caso-toggle-left">
+                  <span className="caso-chevron">{st.open ? "▾" : "▸"}</span>
                   <strong>{c.nombre}</strong>
                   {c.pais && <span className="caso-pais">{c.pais}</span>}
+                  {analisis && (
+                    <span className={`caso-badge ${esLegal ? "badge-legal" : "badge-no-legal"}`}>
+                      {esLegal ? "● Legal" : "○ No legal"}
+                    </span>
+                  )}
+                  {analisis && <span className="caso-resumen-inline">{analisis.resumen}</span>}
+                </div>
+                <div className="caso-toggle-right">
                   <span className="caso-fecha">{formatFecha(c.created_at)}</span>
                 </div>
-                <div className="caso-contacto">{c.contacto}</div>
-                {c.tipo && <div className="caso-tipo">{c.tipo}</div>}
-              </div>
+              </button>
 
-              {c.caso && <p className="caso-texto">{c.caso}</p>}
+              {/* CUERPO COLAPSABLE */}
+              {st.open && (
+                <div className="caso-body">
+                  <div className="caso-contacto">{c.contacto}</div>
+                  {c.tipo && <div className="caso-tipo">{c.tipo}</div>}
+                  {c.caso && <p className="caso-texto">{c.caso}</p>}
 
-              <div className="caso-actions">
-                <button
-                  className="caso-btn caso-btn-resumir"
-                  onClick={() => handleResumit(c)}
-                  disabled={st.loadingResumen}
-                >
-                  {st.loadingResumen ? "Analizando..." : analisis ? "↻ Re-analizar" : "Resumir"}
-                </button>
+                  <div className="caso-actions">
+                    <button className="caso-btn caso-btn-resumir" onClick={() => handleResumit(c)} disabled={st.loadingResumen}>
+                      {st.loadingResumen ? "Analizando..." : analisis ? "↻ Re-analizar" : "Resumir"}
+                    </button>
+                    {esLegal && (
+                      <button className="caso-btn caso-btn-ley" onClick={() => handleInvestigar(c)} disabled={st.loadingLey}>
+                        {st.loadingLey ? "Consultando..." : st.articulos ? "↻ Ver ley" : "Ver ley →"}
+                      </button>
+                    )}
+                    {st.articulos && (
+                      <button className="caso-btn caso-btn-brief" onClick={() => handleAnalizar(c)} disabled={st.loadingBrief}>
+                        {st.loadingBrief ? "Analizando..." : st.brief ? "↻ Brief" : "Analizar →"}
+                      </button>
+                    )}
+                  </div>
 
-                {esLegal && (
-                  <button
-                    className="caso-btn caso-btn-ley"
-                    onClick={() => handleInvestigar(c)}
-                    disabled={st.loadingLey}
-                  >
-                    {st.loadingLey ? "Consultando..." : st.articulos ? "↻ Ver ley" : "Ver ley →"}
-                  </button>
-                )}
-
-                {st.articulos && (
-                  <button
-                    className="caso-btn caso-btn-brief"
-                    onClick={() => handleAnalizar(c)}
-                    disabled={st.loadingBrief}
-                  >
-                    {st.loadingBrief ? "Analizando..." : st.brief ? "↻ Brief" : "Analizar →"}
-                  </button>
-                )}
-              </div>
-
-              {analisis && (
-                <div className="caso-analisis">
-                  <span className={`caso-badge ${esLegal ? "badge-legal" : "badge-no-legal"}`}>
-                    {esLegal ? "● Legal" : "○ No legal"}
-                  </span>
-                  <p className="caso-resumen">{analisis.resumen}</p>
-                  {esLegal && analisis.concepto_legal && (
+                  {analisis && esLegal && analisis.concepto_legal && (
                     <p className="caso-concepto">Concepto: <em>{analisis.concepto_legal}</em></p>
                   )}
-                  {st.errorResumen && <p style={{ color: "var(--terra)", fontSize: "0.85rem" }}>{st.errorResumen}</p>}
-                </div>
-              )}
+                  {st.errorResumen && <p style={{ color: "var(--terra)", fontSize: "0.85rem", marginTop: 8 }}>{st.errorResumen}</p>}
 
-              {st.expandLey && (
-                <div className="caso-ley">
-                  {st.loadingLey && <p className="caso-ley-loading">Consultando corpus checo…</p>}
-                  {st.errorLey && <p style={{ color: "var(--terra)" }}>{st.errorLey}</p>}
-                  {st.articulos && (
-                    <>
-                      <div className="caso-ley-label">Artículos recuperados (Tesseum CZ)</div>
-                      <pre className="caso-ley-texto">{st.articulos}</pre>
-                    </>
+                  {st.expandLey && (
+                    <div className="caso-ley">
+                      {st.loadingLey && <p className="caso-ley-loading">Consultando corpus checo…</p>}
+                      {st.errorLey && <p style={{ color: "var(--terra)", padding: "12px 14px" }}>{st.errorLey}</p>}
+                      {st.articulos && (
+                        <>
+                          <div className="caso-ley-label">Artículos recuperados (Tesseum CZ)</div>
+                          <pre className="caso-ley-texto">{st.articulos}</pre>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {st.expandBrief && (
+                    <div className="caso-brief">
+                      {st.loadingBrief && <p className="caso-ley-loading">Generando análisis…</p>}
+                      {st.errorBrief && <p style={{ color: "var(--terra)", padding: "12px 14px" }}>{st.errorBrief}</p>}
+                      {st.brief && (
+                        <>
+                          <div className="caso-brief-label">Brief legal (uso interno)</div>
+                          <div className="caso-brief-texto">{renderBrief(st.brief)}</div>
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
 
-              {st.expandBrief && (
-                <div className="caso-brief">
-                  {st.loadingBrief && <p className="caso-ley-loading">Generando análisis…</p>}
-                  {st.errorBrief && <p style={{ color: "var(--terra)" }}>{st.errorBrief}</p>}
-                  {st.brief && (
-                    <>
-                      <div className="caso-brief-label">Brief legal (uso interno)</div>
-                      <div className="caso-brief-texto">{renderBrief(st.brief)}</div>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           );
         })}
