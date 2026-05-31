@@ -1,5 +1,4 @@
 import ContactForm from "./components/ContactForm";
-import MiniChat from "./components/MiniChat";
 
 export default function Home() {
   return (
@@ -23,7 +22,7 @@ export default function Home() {
             entiende el sistema checo y te dice qué hacer — paso a paso, sin que te pierdas en la burocracia.
           </p>
           <div className="hero-cta">
-            <a href="#orientacion" className="btn-primary">Consulta la ley ahora</a>
+            <a href="#contacto" className="btn-primary">Cuéntame tu caso gratis</a>
             <a href="#como" className="btn-ghost">Cómo funciona →</a>
           </div>
           <div className="hero-trust">
@@ -42,17 +41,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
-      <section id="orientacion">
-        <div className="wrap">
-          <div className="sec-label">Consulta gratuita</div>
-          <h2 className="sec-title">Pregúntame sobre la ley checa de extranjería.</h2>
-          <p className="sec-intro">
-            Respondo con la legislación vigente, en español, al instante. Sin dictámenes — solo te explico qué dice la ley para que llegues preparado a tu consulta.
-          </p>
-          <MiniChat />
-        </div>
-      </section>
 
       <section>
         <div className="wrap">
