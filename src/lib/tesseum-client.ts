@@ -1,7 +1,7 @@
 const TESSEUM_MCP_URL = process.env.TESSEUM_MCP_URL || "https://www.tesseum.com/api/mcp";
 const TESSEUM_MCP_KEY = process.env.TESSEUM_MCP_KEY;
 
-const JURISDICCION = "republica_checa";
+const PAIS = "CZ";
 
 async function callTesseumTool(toolName: string, args: Record<string, unknown>): Promise<string> {
   if (!TESSEUM_MCP_KEY) throw new Error("Falta TESSEUM_MCP_KEY en el entorno.");
@@ -30,7 +30,7 @@ async function callTesseumTool(toolName: string, args: Record<string, unknown>):
   }
 
   const contentType = res.headers.get("content-type") || "";
-  let payload: { error?: unknown; result?: { content?: { type: string; text: string }[] } };
+  let payload: { error?: unknown; result?: { content?: { type: string; text: string }[]; isError?: boolean } };
   if (contentType.includes("text/event-stream")) {
     payload = parseSSE(await res.text());
   } else {
@@ -40,6 +40,7 @@ async function callTesseumTool(toolName: string, args: Record<string, unknown>):
   if (payload.error) throw new Error(`Tesseum MCP error: ${JSON.stringify(payload.error)}`);
 
   const content = payload.result?.content || [];
+  if (payload.result?.isError) throw new Error(content.map((b) => b.text).join(" "));
   return content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
 }
 
@@ -55,9 +56,9 @@ export async function recuperarContextoLegal(consulta: string): Promise<
 > {
   try {
     const resultado = await callTesseumTool("buscar_articulos_semantico", {
-      jurisdiccion: JURISDICCION,
-      consulta,
-      top_k: 5,
+      pais: PAIS,
+      concepto: consulta,
+      match_count: 5,
     });
     return { ok: true, contexto: resultado };
   } catch (err: unknown) {
