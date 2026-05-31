@@ -58,8 +58,11 @@ export async function POST(req: Request) {
   const geminiBody = {
     systemInstruction: { parts: [{ text: PUENTE_SYSTEM_PROMPT }] },
     contents: [{ role: "user", parts: [{ text: userTurn }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 1200 },
-    thinkingConfig: { thinkingBudget: 0 },
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 1200,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
   };
 
   let upstream: Response;
