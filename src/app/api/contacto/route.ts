@@ -22,16 +22,13 @@ export async function POST(req: Request) {
     return Response.json({ error: "Nombre y contacto son obligatorios" }, { status: 400 });
   }
 
-  const { error } = await getClient()
-    .schema("puente_migrante")
-    .from("contact_messages")
-    .insert({
-      nombre,
-      pais: String(body.pais || "").trim().slice(0, 100) || null,
-      contacto,
-      tipo: String(body.tipo || "").trim().slice(0, 100) || null,
-      caso: String(body.caso || "").trim().slice(0, 3000) || null,
-    });
+  const { error } = await getClient().rpc("puente_insert_contacto", {
+    p_nombre: nombre,
+    p_pais: String(body.pais || "").trim().slice(0, 100) || null,
+    p_contacto: contacto,
+    p_tipo: String(body.tipo || "").trim().slice(0, 100) || null,
+    p_caso: String(body.caso || "").trim().slice(0, 3000) || null,
+  });
 
   if (error) {
     console.error("contact_messages insert error:", error);
