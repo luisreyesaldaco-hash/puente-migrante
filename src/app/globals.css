@@ -1,6 +1,6 @@
 :root {
   --ink: #1a2238;
-  --ink-soft: #44506b;
+  --ink-soft: #111111;
   --paper: #f6f1e7;
   --paper-warm: #efe6d4;
   --terra: #c2410c;
@@ -21,7 +21,7 @@ body {
   overflow-x: hidden;
   background-image:
     radial-gradient(circle at 12% 8%, rgba(184,137,63,0.10), transparent 40%),
-    radial-gradient(circle at 88% 92%, rgba(194,65,12,0.07), transparent 45%);
+    radial-gradient(circle at 88% 92%, rgba(46,11,11,0.07), transparent 45%);
 }
 
 body::after {
@@ -54,7 +54,7 @@ nav {
 }
 .brand .mark {
   width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--terra), var(--gold));
+  background: linear-gradient(135deg, #c2410c, #b8893f);
   display: grid; place-items: center; color: var(--white);
   font-size: 0.85rem; font-weight: 700;
   font-family: var(--font-mulish), 'Mulish', sans-serif;
@@ -67,7 +67,15 @@ nav {
 .nav-cta:hover { background: var(--terra); transform: translateY(-1px); }
 
 /* HERO */
-header { padding: 88px 0 72px; position: relative; }
+header {
+  padding: 96px 0 96px;
+  position: relative;
+  background-image:
+    linear-gradient(to right, var(--paper) 57%, rgba(246,241,231,0.88) 63%, rgba(246,241,231,0.62) 69%, rgba(246,241,231,0.32) 75%, rgba(246,241,231,0.08) 81%, rgba(246,241,231,0) 87%),
+    url('/praga.jpg');
+  background-size: cover;
+  background-position: 0% 40%;
+}
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
@@ -100,9 +108,9 @@ h1 em { font-style: italic; color: var(--terra-deep); }
 .btn-primary {
   background: var(--terra); color: var(--white); text-decoration: none;
   font-weight: 700; font-size: 1rem; padding: 15px 30px; border-radius: 100px;
-  box-shadow: 0 8px 24px rgba(194,65,12,0.28); transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 8px 24px rgba(46,11,11,0.28); transition: transform .2s, box-shadow .2s;
 }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(194,65,12,0.4); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(46,11,11,0.4); }
 .btn-ghost {
   color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.98rem;
   display: inline-flex; align-items: center; gap: 8px; transition: gap .2s;
@@ -110,7 +118,7 @@ h1 em { font-style: italic; color: var(--terra-deep); }
 .btn-ghost:hover { gap: 12px; }
 
 .hero-trust {
-  margin-top: 46px; display: flex; gap: 30px; flex-wrap: wrap;
+  margin-top: 46px; display: flex; flex-direction: column; gap: 14px;
   opacity: 0; animation: rise .8s .65s forwards;
 }
 .trust-item { display: flex; align-items: center; gap: 10px; font-size: 0.92rem; color: var(--ink-soft); }
@@ -135,7 +143,7 @@ section { padding: 78px 0; }
 .empathy::before {
   content: ""; position: absolute; top: -60px; right: -60px;
   width: 280px; height: 280px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(194,65,12,0.35), transparent 70%);
+  background: radial-gradient(circle, rgba(46,11,11,0.35), transparent 70%);
 }
 .empathy .sec-label { color: var(--gold); }
 .empathy .sec-title { color: var(--white); position: relative; }
