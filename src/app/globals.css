@@ -1,6 +1,6 @@
 :root {
   --ink: #1a2238;
-  --ink-soft: #111111;
+  --ink-soft: #44506b;
   --paper: #f6f1e7;
   --paper-warm: #efe6d4;
   --terra: #c2410c;
@@ -67,15 +67,7 @@ nav {
 .nav-cta:hover { background: var(--terra); transform: translateY(-1px); }
 
 /* HERO */
-header {
-  padding: 96px 0 96px;
-  position: relative;
-  background-image:
-    linear-gradient(to right, var(--paper) 57%, rgba(246,241,231,0.88) 63%, rgba(246,241,231,0.62) 69%, rgba(246,241,231,0.32) 75%, rgba(246,241,231,0.08) 81%, rgba(246,241,231,0) 87%),
-    url('/praga.jpg');
-  background-size: cover;
-  background-position: 0% 40%;
-}
+header { padding: 88px 0 72px; position: relative; }
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
@@ -118,7 +110,7 @@ h1 em { font-style: italic; color: var(--terra-deep); }
 .btn-ghost:hover { gap: 12px; }
 
 .hero-trust {
-  margin-top: 46px; display: flex; flex-direction: column; gap: 14px;
+  margin-top: 46px; display: flex; gap: 30px; flex-wrap: wrap;
   opacity: 0; animation: rise .8s .65s forwards;
 }
 .trust-item { display: flex; align-items: center; gap: 10px; font-size: 0.92rem; color: var(--ink-soft); }
