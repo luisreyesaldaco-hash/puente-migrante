@@ -367,6 +367,23 @@ footer small { color: var(--ink-soft); font-size: 0.82rem; }
   padding: 8px 14px;
 }
 .caso-ley-loading { padding: 16px; color: var(--ink-soft); font-size: 0.9rem; }
+.caso-btn-brief { background: var(--gold); color: var(--ink); }
+.caso-brief {
+  margin-top: 14px; border: 1px solid var(--gold); border-radius: 10px; overflow: hidden;
+}
+.caso-brief-label {
+  background: var(--gold); color: var(--ink); font-size: 0.78rem;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 8px 14px;
+}
+.caso-brief-texto {
+  padding: 16px 14px; background: var(--white); font-size: 0.9rem; line-height: 1.7;
+}
+.brief-heading { font-weight: 700; margin: 10px 0 4px; color: var(--ink); }
+.brief-heading:first-child { margin-top: 0; }
+.brief-item { padding-left: 12px; color: var(--ink); margin: 2px 0; }
+.brief-line { color: var(--ink-soft); margin: 2px 0; }
+
 .caso-ley-texto {
   font-family: var(--font-mulish), sans-serif; font-size: 0.85rem;
   line-height: 1.65; color: var(--ink); padding: 16px 14px;

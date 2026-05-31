@@ -21,12 +21,29 @@ type Analisis = {
 type CasoState = {
   analisis?: Analisis;
   articulos?: string;
+  brief?: string;
   loadingResumen?: boolean;
   loadingLey?: boolean;
+  loadingBrief?: boolean;
   errorResumen?: string;
   errorLey?: string;
+  errorBrief?: string;
   expandLey?: boolean;
+  expandBrief?: boolean;
 };
+
+function renderBrief(text: string): React.ReactNode {
+  return text.split("\n").map((line, i) => {
+    if (line.startsWith("**") && line.endsWith("**")) {
+      return <p key={i} className="brief-heading">{line.slice(2, -2)}</p>;
+    }
+    if (line.startsWith("- ")) {
+      return <p key={i} className="brief-item">• {line.slice(2)}</p>;
+    }
+    if (line.trim() === "") return <br key={i} />;
+    return <p key={i} className="brief-line">{line}</p>;
+  });
+}
 
 function formatFecha(iso: string) {
   return new Date(iso).toLocaleString("es-MX", {
@@ -76,6 +93,23 @@ export default function AdminShell() {
       setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: false, errorResumen: data.error } }));
     } else {
       setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: false, analisis: data } }));
+    }
+  }
+
+  async function handleAnalizar(caso: Caso) {
+    const articulos = estados[caso.id]?.articulos;
+    if (!articulos) return;
+    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: true, errorBrief: undefined, expandBrief: true } }));
+    const res = await fetch("/api/admin/analizar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ caso: caso.caso, articulos }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, errorBrief: data.error } }));
+    } else {
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, brief: data.brief } }));
     }
   }
 
@@ -175,6 +209,16 @@ export default function AdminShell() {
                     {st.loadingLey ? "Consultando..." : st.articulos ? "↻ Ver ley" : "Ver ley →"}
                   </button>
                 )}
+
+                {st.articulos && (
+                  <button
+                    className="caso-btn caso-btn-brief"
+                    onClick={() => handleAnalizar(c)}
+                    disabled={st.loadingBrief}
+                  >
+                    {st.loadingBrief ? "Analizando..." : st.brief ? "↻ Brief" : "Analizar →"}
+                  </button>
+                )}
               </div>
 
               {analisis && (
@@ -196,8 +240,21 @@ export default function AdminShell() {
                   {st.errorLey && <p style={{ color: "var(--terra)" }}>{st.errorLey}</p>}
                   {st.articulos && (
                     <>
-                      <div className="caso-ley-label">Ley aplicable (Tesseum CZ)</div>
+                      <div className="caso-ley-label">Artículos recuperados (Tesseum CZ)</div>
                       <pre className="caso-ley-texto">{st.articulos}</pre>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {st.expandBrief && (
+                <div className="caso-brief">
+                  {st.loadingBrief && <p className="caso-ley-loading">Generando análisis…</p>}
+                  {st.errorBrief && <p style={{ color: "var(--terra)" }}>{st.errorBrief}</p>}
+                  {st.brief && (
+                    <>
+                      <div className="caso-brief-label">Brief legal (uso interno)</div>
+                      <div className="caso-brief-texto">{renderBrief(st.brief)}</div>
                     </>
                   )}
                 </div>
