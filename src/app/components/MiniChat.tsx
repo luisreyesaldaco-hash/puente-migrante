@@ -3,13 +3,38 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
 function getOrCreateSessionId(): string {
-  const KEY = "pm_sid";
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(/(?:^|;\s*)pm_sid=([^;]+)/);
   if (match) return match[1];
   const id = crypto.randomUUID();
-  document.cookie = `${KEY}=${id}; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax`;
+  document.cookie = `pm_sid=${id}; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax`;
   return id;
+}
+
+function renderMarkdown(text: string): React.ReactNode {
+  const paragraphs = text.split(/\n{2,}/);
+  return paragraphs.map((para, i) => {
+    const parts: React.ReactNode[] = [];
+    let remaining = para;
+    let key = 0;
+    while (remaining) {
+      const bold = remaining.match(/^([\s\S]*?)\*\*(.+?)\*\*([\s\S]*)/);
+      const italic = remaining.match(/^([\s\S]*?)\*(.+?)\*([\s\S]*)/);
+      if (bold && (!italic || bold[0].length <= italic[0].length)) {
+        if (bold[1]) parts.push(bold[1]);
+        parts.push(<strong key={key++}>{bold[2]}</strong>);
+        remaining = bold[3];
+      } else if (italic) {
+        if (italic[1]) parts.push(italic[1]);
+        parts.push(<em key={key++}>{italic[2]}</em>);
+        remaining = italic[3];
+      } else {
+        parts.push(remaining);
+        break;
+      }
+    }
+    return <p key={i} style={{ margin: i > 0 ? "10px 0 0" : "0" }}>{parts}</p>;
+  });
 }
 
 type ChatState =
@@ -51,11 +76,11 @@ export default function MiniChat() {
 
       if (contentType.includes("application/json")) {
         const data = await res.json();
-        if (data.tipo === "limite") {
-          setState({ phase: "limite", mensaje: data.mensaje });
-        } else {
-          setState({ phase: "error", mensaje: data.mensaje || "Error inesperado. Intenta de nuevo." });
-        }
+        setState(
+          data.tipo === "limite"
+            ? { phase: "limite", mensaje: data.mensaje }
+            : { phase: "error", mensaje: data.mensaje || "Error inesperado. Intenta de nuevo." }
+        );
         return;
       }
 
@@ -90,6 +115,7 @@ export default function MiniChat() {
 
   const isAnswering = state.phase === "streaming" || state.phase === "done";
   const showFallback = state.phase === "limite" || state.phase === "error";
+  const fallbackMensaje = "mensaje" in state ? state.mensaje : "";
 
   return (
     <div className="mini-chat">
@@ -132,14 +158,14 @@ export default function MiniChat() {
 
           {isAnswering && (
             <div className="mini-chat-answer">
-              {state.text}
+              {renderMarkdown("text" in state ? state.text : "")}
               {state.phase === "streaming" && <span className="mini-chat-cursor" />}
             </div>
           )}
 
           {showFallback && (
             <div className="mini-chat-fallback">
-              <p>{state.phase === "limite" || state.phase === "error" ? (state as { mensaje: string }).mensaje : ""}</p>
+              <p>{fallbackMensaje}</p>
               <a href="#contacto" className="btn-primary" style={{ display: "inline-block", marginTop: "16px", fontSize: "0.95rem", padding: "12px 24px" }}>
                 Déjame tu caso por formulario →
               </a>
