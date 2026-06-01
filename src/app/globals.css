@@ -319,29 +319,30 @@ footer small { color: var(--ink-soft); font-size: 0.82rem; }
 }
 .caso-card {
   background: var(--white); border: 1px solid var(--line); border-radius: 16px;
-  padding: 22px 24px; margin-bottom: 18px;
+  margin-bottom: 12px; overflow: hidden;
 }
+.caso-card--open { border-color: var(--gold); }
 .caso-toggle {
-  width: 100%; background: none; border: none; cursor: pointer; text-align: left;
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding: 0; font-family: var(--font-mulish), sans-serif;
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 16px 20px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; text-align: left;
+  font-family: var(--font-mulish), sans-serif;
+  transition: background .15s;
 }
-.caso-toggle:hover { opacity: 0.85; }
-.caso-toggle-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0; }
-.caso-toggle-right { flex-shrink: 0; }
-.caso-chevron { font-size: 0.9rem; color: var(--ink-soft); width: 12px; }
-.caso-resumen-inline {
-  font-size: 0.84rem; color: var(--ink-soft); font-style: italic;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;
-}
-.caso-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.caso-toggle:hover { background: var(--paper); }
+.caso-toggle-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.caso-toggle-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.caso-toggle-arrow { font-size: 0.85rem; color: var(--ink-soft); width: 14px; }
+.caso-toggle-nombre { font-weight: 700; font-size: 0.97rem; color: var(--ink); }
+.caso-contacto-mini { font-size: 0.82rem; color: var(--terra-deep); font-weight: 600; }
+.caso-body { padding: 0 20px 20px; border-top: 1px solid var(--line); }
 .caso-pais {
-  font-size: 0.78rem; background: var(--paper-warm); border: 1px solid var(--line);
-  border-radius: 100px; padding: 2px 10px; color: var(--ink-soft);
+  font-size: 0.75rem; background: var(--paper-warm); border: 1px solid var(--line);
+  border-radius: 100px; padding: 2px 9px; color: var(--ink-soft);
 }
 .caso-fecha { font-size: 0.78rem; color: var(--ink-soft); }
-.caso-contacto { font-size: 0.88rem; color: var(--terra-deep); font-weight: 600; margin-bottom: 3px; }
-.caso-tipo { font-size: 0.82rem; color: var(--ink-soft); }
+.caso-tipo { font-size: 0.82rem; color: var(--ink-soft); margin-top: 12px; }
+.badge-brief { background: #e0f2fe; color: #0369a1; }
 .caso-texto {
   font-size: 0.97rem; color: var(--ink); background: var(--paper);
   border-radius: 10px; padding: 12px 14px; margin: 12px 0; line-height: 1.6;

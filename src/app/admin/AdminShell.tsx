@@ -10,7 +10,7 @@ type Caso = {
   tipo: string | null;
   caso: string | null;
   created_at: string;
-  // cached fields
+  // campos guardados
   resumen: string | null;
   es_legal: boolean | null;
   concepto_legal: string | null;
@@ -20,31 +20,28 @@ type Caso = {
 
 type CasoState = {
   open: boolean;
-  analisis?: { resumen: string; es_legal: boolean; concepto_legal: string | null };
+  resumen?: string;
+  es_legal?: boolean;
+  concepto_legal?: string | null;
   articulos?: string;
   brief?: string;
   loadingResumen?: boolean;
   loadingLey?: boolean;
   loadingBrief?: boolean;
-  expandLey?: boolean;
-  expandBrief?: boolean;
   errorResumen?: string;
   errorLey?: string;
   errorBrief?: string;
 };
 
-function estadoDesdeCache(c: Caso): CasoState {
-  const hasAnalisis = c.resumen != null || c.es_legal != null;
-  return {
-    open: false,
-    analisis: hasAnalisis
-      ? { resumen: c.resumen!, es_legal: c.es_legal!, concepto_legal: c.concepto_legal ?? null }
-      : undefined,
-    articulos: c.articulos ?? undefined,
-    brief: c.brief ?? undefined,
-    expandLey: !!c.articulos,
-    expandBrief: !!c.brief,
-  };
+function renderBrief(text: string): React.ReactNode {
+  return text.split("\n").map((line, i) => {
+    if (line.startsWith("**") && line.endsWith("**"))
+      return <p key={i} className="brief-heading">{line.slice(2, -2)}</p>;
+    if (line.startsWith("- "))
+      return <p key={i} className="brief-item">• {line.slice(2)}</p>;
+    if (line.trim() === "") return <br key={i} />;
+    return <p key={i} className="brief-line">{line}</p>;
+  });
 }
 
 function formatFecha(iso: string) {
@@ -53,23 +50,22 @@ function formatFecha(iso: string) {
   });
 }
 
-function renderBrief(text: string): React.ReactNode {
-  return text.split("\n").map((line, i) => {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("**") && trimmed.endsWith("**"))
-      return <p key={i} className="brief-heading">{trimmed.slice(2, -2)}</p>;
-    if (trimmed.startsWith("- "))
-      return <p key={i} className="brief-item">• {trimmed.slice(2)}</p>;
-    if (trimmed === "") return <br key={i} />;
-    return <p key={i} className="brief-line">{line}</p>;
-  });
+function initState(c: Caso): CasoState {
+  return {
+    open: false,
+    resumen:       c.resumen        ?? undefined,
+    es_legal:      c.es_legal       ?? undefined,
+    concepto_legal: c.concepto_legal ?? undefined,
+    articulos:     c.articulos      ?? undefined,
+    brief:         c.brief          ?? undefined,
+  };
 }
 
 export default function AdminShell() {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed]   = useState(false);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [casos, setCasos] = useState<Caso[]>([]);
+  const [casos, setCasos]     = useState<Caso[]>([]);
   const [estados, setEstados] = useState<Record<number, CasoState>>({});
   const [loading, setLoading] = useState(false);
 
@@ -79,7 +75,7 @@ export default function AdminShell() {
     if (res.status === 401) { setAuthed(false); setLoading(false); return; }
     const data: Caso[] = await res.json();
     setCasos(data);
-    setEstados(Object.fromEntries(data.map((c) => [c.id, estadoDesdeCache(c)])));
+    setEstados(Object.fromEntries(data.map((c) => [c.id, initState(c)])));
     setLoading(false);
   }, []);
 
@@ -98,52 +94,55 @@ export default function AdminShell() {
     setEstados((s) => ({ ...s, [id]: { ...s[id], open: !s[id]?.open } }));
   }
 
-  async function handleResumit(c: Caso) {
-    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: true, errorResumen: undefined } }));
+  async function handleResumit(caso: Caso) {
+    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: true, errorResumen: undefined } }));
     const res = await fetch("/api/admin/resumir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: c.id, caso: c.caso }),
+      body: JSON.stringify({ id: caso.id, caso: caso.caso }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: false, errorResumen: data.error } }));
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingResumen: false, errorResumen: data.error } }));
     } else {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingResumen: false, analisis: data } }));
+      setEstados((s) => ({ ...s, [caso.id]: {
+        ...s[caso.id], loadingResumen: false,
+        resumen: data.resumen, es_legal: data.es_legal, concepto_legal: data.concepto_legal,
+      }}));
     }
   }
 
-  async function handleInvestigar(c: Caso) {
-    const concepto = estados[c.id]?.analisis?.concepto_legal;
+  async function handleInvestigar(caso: Caso) {
+    const concepto = estados[caso.id]?.concepto_legal;
     if (!concepto) return;
-    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: true, errorLey: undefined, expandLey: true } }));
+    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: true, errorLey: undefined } }));
     const res = await fetch("/api/admin/investigar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: c.id, concepto_legal: concepto }),
+      body: JSON.stringify({ id: caso.id, concepto_legal: concepto }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: false, errorLey: data.error } }));
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: false, errorLey: data.error } }));
     } else {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingLey: false, articulos: data.articulos } }));
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingLey: false, articulos: data.articulos } }));
     }
   }
 
-  async function handleAnalizar(c: Caso) {
-    const articulos = estados[c.id]?.articulos;
+  async function handleAnalizar(caso: Caso) {
+    const articulos = estados[caso.id]?.articulos;
     if (!articulos) return;
-    setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: true, errorBrief: undefined, expandBrief: true } }));
+    setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: true, errorBrief: undefined } }));
     const res = await fetch("/api/admin/analizar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: c.id, caso: c.caso, articulos }),
+      body: JSON.stringify({ id: caso.id, caso: caso.caso, articulos }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: false, errorBrief: data.error } }));
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, errorBrief: data.error } }));
     } else {
-      setEstados((s) => ({ ...s, [c.id]: { ...s[c.id], loadingBrief: false, brief: data.brief } }));
+      setEstados((s) => ({ ...s, [caso.id]: { ...s[caso.id], loadingBrief: false, brief: data.brief } }));
     }
   }
 
@@ -177,9 +176,7 @@ export default function AdminShell() {
       </div>
 
       <div className="admin-inbox wrap">
-        <h1 className="admin-title">
-          Casos recibidos <span className="admin-count">{casos.length}</span>
-        </h1>
+        <h1 className="admin-title">Casos recibidos <span className="admin-count">{casos.length}</span></h1>
 
         {casos.length === 0 && !loading && (
           <p style={{ color: "var(--ink-soft)", marginTop: 32 }}>No hay casos aún.</p>
@@ -187,40 +184,40 @@ export default function AdminShell() {
 
         {casos.map((c) => {
           const st = estados[c.id] || { open: false };
-          const analisis = st.analisis;
-          const esLegal = analisis?.es_legal === true;
+          const esLegal = st.es_legal === true;
+          const analizado = st.resumen !== undefined;
 
           return (
-            <div key={c.id} className="caso-card">
+            <div key={c.id} className={`caso-card ${st.open ? "caso-card--open" : ""}`}>
 
-              {/* HEADER — siempre visible, click para colapsar */}
+              {/* HEADER — siempre visible, click para abrir/cerrar */}
               <button className="caso-toggle" onClick={() => toggleOpen(c.id)}>
                 <div className="caso-toggle-left">
-                  <span className="caso-chevron">{st.open ? "▾" : "▸"}</span>
-                  <strong>{c.nombre}</strong>
+                  <span className="caso-toggle-arrow">{st.open ? "▾" : "▸"}</span>
+                  <span className="caso-toggle-nombre">{c.nombre}</span>
                   {c.pais && <span className="caso-pais">{c.pais}</span>}
-                  {analisis && (
+                  {analizado && (
                     <span className={`caso-badge ${esLegal ? "badge-legal" : "badge-no-legal"}`}>
                       {esLegal ? "● Legal" : "○ No legal"}
                     </span>
                   )}
-                  {analisis && <span className="caso-resumen-inline">{analisis.resumen}</span>}
+                  {st.brief && <span className="caso-badge badge-brief">✓ Brief</span>}
                 </div>
                 <div className="caso-toggle-right">
+                  <span className="caso-contacto-mini">{c.contacto}</span>
                   <span className="caso-fecha">{formatFecha(c.created_at)}</span>
                 </div>
               </button>
 
-              {/* CUERPO COLAPSABLE */}
+              {/* BODY — visible solo cuando open */}
               {st.open && (
                 <div className="caso-body">
-                  <div className="caso-contacto">{c.contacto}</div>
                   {c.tipo && <div className="caso-tipo">{c.tipo}</div>}
                   {c.caso && <p className="caso-texto">{c.caso}</p>}
 
                   <div className="caso-actions">
                     <button className="caso-btn caso-btn-resumir" onClick={() => handleResumit(c)} disabled={st.loadingResumen}>
-                      {st.loadingResumen ? "Analizando..." : analisis ? "↻ Re-analizar" : "Resumir"}
+                      {st.loadingResumen ? "Analizando..." : analizado ? "↻ Re-analizar" : "Resumir"}
                     </button>
                     {esLegal && (
                       <button className="caso-btn caso-btn-ley" onClick={() => handleInvestigar(c)} disabled={st.loadingLey}>
@@ -234,12 +231,17 @@ export default function AdminShell() {
                     )}
                   </div>
 
-                  {analisis && esLegal && analisis.concepto_legal && (
-                    <p className="caso-concepto">Concepto: <em>{analisis.concepto_legal}</em></p>
+                  {analizado && (
+                    <div className="caso-analisis">
+                      <p className="caso-resumen">{st.resumen}</p>
+                      {esLegal && st.concepto_legal && (
+                        <p className="caso-concepto">Concepto: <em>{st.concepto_legal}</em></p>
+                      )}
+                      {st.errorResumen && <p style={{ color: "var(--terra)", fontSize: "0.85rem" }}>{st.errorResumen}</p>}
+                    </div>
                   )}
-                  {st.errorResumen && <p style={{ color: "var(--terra)", fontSize: "0.85rem", marginTop: 8 }}>{st.errorResumen}</p>}
 
-                  {st.expandLey && (
+                  {(st.loadingLey || st.articulos || st.errorLey) && (
                     <div className="caso-ley">
                       {st.loadingLey && <p className="caso-ley-loading">Consultando corpus checo…</p>}
                       {st.errorLey && <p style={{ color: "var(--terra)", padding: "12px 14px" }}>{st.errorLey}</p>}
@@ -252,9 +254,9 @@ export default function AdminShell() {
                     </div>
                   )}
 
-                  {st.expandBrief && (
+                  {(st.loadingBrief || st.brief || st.errorBrief) && (
                     <div className="caso-brief">
-                      {st.loadingBrief && <p className="caso-ley-loading">Generando análisis…</p>}
+                      {st.loadingBrief && <p className="caso-ley-loading">Generando brief…</p>}
                       {st.errorBrief && <p style={{ color: "var(--terra)", padding: "12px 14px" }}>{st.errorBrief}</p>}
                       {st.brief && (
                         <>
@@ -266,7 +268,6 @@ export default function AdminShell() {
                   )}
                 </div>
               )}
-
             </div>
           );
         })}

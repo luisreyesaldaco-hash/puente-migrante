@@ -1,5 +1,5 @@
 import { checkAdminAuth, unauthorizedResponse } from "@/lib/admin-auth";
-import { guardarAnalisis } from "@/lib/admin-supabase";
+import { guardarAnalisis } from "@/lib/admin-db";
 
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
@@ -33,13 +33,19 @@ export async function POST(req: Request) {
 
   const caso = String(body.caso || "").trim();
   const articulos = String(body.articulos || "").trim();
-  const id = Number(body.id);
+  const id = Number(body.id || 0);
   if (!caso || !articulos) return Response.json({ error: "Faltan caso y/o articulos" }, { status: 400 });
+
+  const userTurn = `MENSAJE DEL USUARIO:\n${caso}\n\nARTÍCULOS RECUPERADOS DEL CORPUS CHECO:\n${articulos}`;
 
   const geminiBody = {
     systemInstruction: { parts: [{ text: PROMPT_SISTEMA }] },
-    contents: [{ role: "user", parts: [{ text: `MENSAJE DEL USUARIO:\n${caso}\n\nARTÍCULOS RECUPERADOS DEL CORPUS CHECO:\n${articulos}` }] }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
+    contents: [{ role: "user", parts: [{ text: userTurn }] }],
+    generationConfig: {
+      temperature: 0.2,
+      maxOutputTokens: 1000,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
   };
 
   try {
@@ -48,13 +54,12 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(geminiBody),
     });
+
     if (!res.ok) return Response.json({ error: "Error LLM" }, { status: 502 });
 
     const data = await res.json();
     const brief = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    if (id) await guardarAnalisis(id, { brief });
-
+    if (id) await guardarAnalisis({ id, brief });
     return Response.json({ brief });
   } catch {
     return Response.json({ error: "No se pudo generar el análisis" }, { status: 500 });
